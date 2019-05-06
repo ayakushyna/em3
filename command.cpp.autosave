@@ -1,0 +1,22 @@
+#include "command.h"
+
+Command::Command(): Cell(), op(), operands() {}
+
+//Command::Command(const QString& commandStr)
+//{
+
+//}
+void Command::setCommand(const Operation& op, const QVector<uint64_t>& operands)
+{
+
+}
+//void Command::setCommand(const QString& commandStr)
+//{
+
+//}
+Command Command::getCommand()
+{
+
+}
+
+Command::~Command() {}

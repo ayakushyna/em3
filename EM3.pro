@@ -29,13 +29,15 @@ SOURCES += \
         mainwindow.cpp \
     memory.cpp \
     command.cpp \
-    constant.cpp
+    constant.cpp \
+    em3.cpp
 
 HEADERS += \
         mainwindow.h \
     memory.h \
     command.h \
-    constant.h
+    constant.h \
+    em3.h
 
 FORMS += \
         mainwindow.ui
