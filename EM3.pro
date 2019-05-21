@@ -25,19 +25,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    commandstring.cpp \
         main.cpp \
         mainwindow.cpp \
     memory.cpp \
-    command.cpp \
-    constant.cpp \
-    em3.cpp
+    em3.cpp \
+    memorydialog.cpp \
+    parser.cpp
 
 HEADERS += \
+    commandstring.h \
         mainwindow.h \
     memory.h \
-    command.h \
-    constant.h \
-    em3.h
+    em3.h \
+    memorydialog.h \
+    operation.h \
+    parser.h
 
 FORMS += \
         mainwindow.ui
