@@ -1,25 +1,26 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <QVector>
 #include <memory>
+#include <QVector>
+#include <QString>
 
-class Cell
-{
-public:
-    Cell();
-    virtual ~Cell();
-};
 
 class Memory
 {
 public:
     Memory();
+    Memory(const QVector<QString>& cells);
+    void setMemoryCells(const QVector<QString>& cells);
+    const QVector<QString>& getMemoryCells() const;
     ~Memory();
 
+    QString& operator[](uint16_t index);
+    const QString& operator[](uint16_t index) const;
+
 private:
-    uint16_t size = 512;
-    QVector<std::shared_ptr<Cell>> memoryCells;
+    static const uint16_t size = 65535;
+    QVector<QString> memoryCells;
 };
 
 #endif // MEMORY_H
