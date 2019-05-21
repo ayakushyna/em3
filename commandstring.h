@@ -1,9 +1,9 @@
 #ifndef COMMANDSTRING_H
 #define COMMANDSTRING_H
 
-#include <string>
 #include <QVector>
 #include <QString>
+
 enum SA { NA, PA, KPA, BRA, IA};
 
 class CommandString
@@ -21,17 +21,17 @@ private:
 
 public:
     CommandString();
-    CommandString(QString str, uint16_t address);
+    CommandString(const QString &str, uint16_t address);
 
-    void setArgs(QString str);
+    void setArgs(const QString &str);
     //void setArgs(QVector<uint16_t> args);
-    QVector<uint16_t> getArgs();
+    const QVector<uint16_t>& getArgs()const;
 
-    void setAddressing(QString str);
+    void setAddressing(const QString &str);
     //void setAddressing(QVector<SA> sa);
-    QVector<SA> getAddressing();
+    const QVector<SA>& getAddressing()const;
 
-    void setKey(QString str);
+    void setKey(const QString &str);
     //void setKey(uint16_t key);
     uint16_t getKey();
 

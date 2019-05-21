@@ -2,14 +2,17 @@
 #define PARSER_H
 
 #include <QString>
+#include <QVector>
 #include "exception"
-#include "em3.h"
 
 class Parser
 {
+private:
+
 public:
     Parser();
-    QVector<QString> parseToMemory(const QString& lines);
+    static QVector<QString> parseToMemory(const QString& lines);
+    ~Parser();
 };
 
 #endif // PARSER_H

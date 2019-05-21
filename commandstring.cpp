@@ -2,7 +2,7 @@
 
 CommandString::CommandString():address(0), key(0), args(){}
 
-CommandString::CommandString(QString str, uint16_t address){
+CommandString::CommandString(const QString &str, uint16_t address){
     setAddress(address);
     setKey(str);
     setAddressing(str);
@@ -19,7 +19,7 @@ uint16_t CommandString::getAddress()
     return this->address;
 }
 
-void CommandString::setKey(QString str)
+void CommandString::setKey(const QString &str)
 {
     QString keyStr = str.left(keyLength);
 
@@ -32,7 +32,7 @@ uint16_t CommandString::getKey()
     return this->key;
 }
 
-void CommandString::setAddressing(QString str)
+void CommandString::setAddressing(const QString &str)
 {
     sa.resize(saNum);
     QString addressingStr = str.mid(keyLength,saNum*saLength);
@@ -43,12 +43,12 @@ void CommandString::setAddressing(QString str)
     }
 }
 
-QVector<SA> CommandString::getAddressing()
+const QVector<SA>& CommandString::getAddressing()const
 {
     return this->sa;
 }
 
-void CommandString::setArgs(QString str)
+void CommandString::setArgs(const QString &str)
 {
     int argsNum = saNum*2;
     args.resize(argsNum);
@@ -63,7 +63,7 @@ void CommandString::setArgs(QString str)
     }
 }
 
-QVector<uint16_t> CommandString::getArgs()
+const QVector<uint16_t>& CommandString::getArgs() const
 {
     return this->args;
 }

@@ -29,3 +29,8 @@ QVector<QString> Parser::parseToMemory(const QString &lines)
     return list.toVector();
 
 }
+
+Parser::~Parser()
+{
+
+}
