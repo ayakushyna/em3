@@ -7,11 +7,10 @@
 
 class Parser
 {
-private:
-
 public:
     Parser();
-    static QVector<QString> parseToMemory(const QString& lines);
+    static const uint8_t length = 23;
+    static QString&  parseToMemory( QString& lines);
     ~Parser();
 };
 

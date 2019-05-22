@@ -7,14 +7,35 @@ MainWindow::MainWindow(QWidget *parent) :
     em3()
 {
     ui->setupUi(this);
+
     ui->saveButton->setEnabled(false);
     ui->nextStepButton->setEnabled(false);
     ui->showButton->setEnabled(false);
     ui->enterButton->setEnabled(false);
-    ui->registersListWidget->setEnabled(false);
+
+    setProgramTableWidget(ui->programTableWidget);
+    setRegistersListWidget(ui->registersListWidget);
+
     ui->inputTextEdit->setEnabled(false);
     ui->outputTextEdit->setEnabled(false);
 }
+
+void MainWindow::setProgramTableWidget(QTableWidget* table)
+{
+    Memory memory = em3.getMemory();
+    int count = memory.getSize();
+    table->setRowCount(count);
+
+    for(int i = 0; i < count; i++)
+    {
+        QLineEdit* line = new QLineEdit(memory[i]);
+        line->setFrame(false);
+        line->setInputMask(QString("HH H HH HHHH H HH HHHH H HH HHHH"));
+        table->setCellWidget(i, 0, line);
+    }
+}
+
+void MainWindow::setRegistersListWidget(QListWidget* list){}
 
 MainWindow::~MainWindow()
 {
@@ -23,8 +44,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    QString text = ui->programTextEdit->toPlainText();
-    QVector<QString> cells = Parser::parseToMemory(text);
+    QTableWidget* table = ui->programTableWidget;
+    QVector<QString> cells;
+
+    for(int i = 0; i < table->rowCount(); i++)
+    {
+        QString str = dynamic_cast<QLineEdit*>(table->cellWidget(i,0))->text();
+        str = Parser::parseToMemory(str);
+        cells.append(str);
+    }
+    //QString text = ui->programTextEdit->toPlainText();
+    //str = Parser::parseToMemory(str);
     Memory memory(cells);
     em3.setMemory(memory);
 
@@ -58,3 +88,4 @@ void MainWindow::on_showButton_clicked()
     dialog->show();
 
 }
+

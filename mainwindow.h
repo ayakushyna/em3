@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtWidgets>
 #include "em3.h"
 #include "memory.h"
 #include "parser.h"
@@ -22,6 +23,9 @@ public:
 private:
     Ui::MainWindow *ui;
     EM3 em3;
+
+    void setProgramTableWidget(QTableWidget* table);
+    void setRegistersListWidget(QListWidget* list);
 
 private slots:
     void on_startButton_clicked();

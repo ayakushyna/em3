@@ -14,16 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPlainTextEdit" name="programTextEdit">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>411</width>
-      <height>431</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPlainTextEdit" name="inputTextEdit">
     <property name="geometry">
      <rect>
@@ -131,6 +121,47 @@
       <height>431</height>
      </rect>
     </property>
+   </widget>
+   <widget class="QTableWidget" name="programTableWidget">
+    <property name="geometry">
+     <rect>
+      <x>25</x>
+      <y>11</y>
+      <width>351</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Century Gothic</family>
+      <pointsize>11</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="rowCount">
+     <number>10</number>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>true</bool>
+    </attribute>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <column/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
