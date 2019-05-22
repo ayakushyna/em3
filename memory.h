@@ -4,7 +4,7 @@
 #include <memory>
 #include <QVector>
 #include <QString>
-
+#include "parser.h"
 
 class Memory
 {
@@ -15,11 +15,13 @@ public:
     const QVector<QString>& getMemoryCells() const;
     ~Memory();
 
-    QString& operator[](uint16_t index);
-    const QString& operator[](uint16_t index) const;
+    QString& operator[](int index);
+    const QString& operator[](int index) const;
+
+    int getSize() const;
 
 private:
-    static const uint16_t size = 65535;
+    static const uint16_t size = 10;
     QVector<QString> memoryCells;
 };
 

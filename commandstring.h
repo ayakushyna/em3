@@ -4,20 +4,26 @@
 #include <QVector>
 #include <QString>
 
-enum SA { NA, PA, KPA, BRA, IA};
+//Methods of Addressing
+enum MA { ImA, DA, IRA, BRA, IA};
+//Immediate Addressing
+//Direct Addressing
+//Indirect Register Addressing
+//Basic Register Addressing
+//Index Addressing
 
 class CommandString
 {
 private:
     uint16_t address;
     uint16_t key;
-    QVector<SA> sa;
+    QVector<MA> ma;
     QVector<uint16_t> args;
 
-    static const int saNum = 3;
-    static const int saLength = 1;
-    static const int keyLength = 2;
-    static const int argLength = 4;
+    static const uint8_t maNum = 3;
+    static const uint8_t maLength = 1;
+    static const uint8_t keyLength = 2;
+    static const uint8_t argLength = 4;
 
 public:
     CommandString();
@@ -26,10 +32,13 @@ public:
     void setArgs(const QString &str);
     //void setArgs(QVector<uint16_t> args);
     const QVector<uint16_t>& getArgs()const;
+    uint16_t getArg1(uint8_t index)const;
+    uint16_t getArg2(uint8_t index)const;
 
-    void setAddressing(const QString &str);
+    void setMAs(const QString &str);
     //void setAddressing(QVector<SA> sa);
-    const QVector<SA>& getAddressing()const;
+    const QVector<MA>& getMAs()const;
+    const MA& getMA(uint8_t index)const;
 
     void setKey(const QString &str);
     //void setKey(uint16_t key);

@@ -5,7 +5,7 @@ CommandString::CommandString():address(0), key(0), args(){}
 CommandString::CommandString(const QString &str, uint16_t address){
     setAddress(address);
     setKey(str);
-    setAddressing(str);
+    setMAs(str);
     setArgs(str);
 }
 
@@ -32,30 +32,35 @@ uint16_t CommandString::getKey()
     return this->key;
 }
 
-void CommandString::setAddressing(const QString &str)
+void CommandString::setMAs(const QString &str)
 {
-    sa.resize(saNum);
-    QString addressingStr = str.mid(keyLength,saNum*saLength);
+    ma.resize(maNum);
+    QString addressingStr = str.mid(keyLength,maNum*maLength);
 
-    for(int i = 0; i < saNum; i++)
+    for(int i = 0; i < maNum; i++)
     {
-        this->sa[i] = static_cast<SA>(addressingStr[i].digitValue());
+        this->ma[i] = static_cast<MA>(addressingStr[i].digitValue());
     }
 }
 
-const QVector<SA>& CommandString::getAddressing()const
+const QVector<MA>& CommandString::getMAs()const
 {
-    return this->sa;
+    return this->ma;
+}
+
+const MA& CommandString::getMA(uint8_t index)const
+{
+    return this->ma[index % maNum];
 }
 
 void CommandString::setArgs(const QString &str)
 {
-    int argsNum = saNum*2;
+    int argsNum = maNum*2;
     args.resize(argsNum);
 
     for(int i = 0; i < argsNum; i++)
     {
-        int index = keyLength + saNum*saLength + i*argLength;
+        int index = keyLength + maNum*maLength + i*argLength;
         QString argStr = str.mid(index,argLength);
 
         bool ok = true;
@@ -66,4 +71,14 @@ void CommandString::setArgs(const QString &str)
 const QVector<uint16_t>& CommandString::getArgs() const
 {
     return this->args;
+}
+
+uint16_t CommandString::getArg1(uint8_t index)const
+{
+    return this->args[2*(index % maNum)];
+}
+
+uint16_t CommandString::getArg2(uint8_t index)const
+{
+    return this->args[2*(index % maNum) + 1];
 }

@@ -1,6 +1,6 @@
 #include "memorydialog.h"
 
-MemoryDialog::MemoryDialog(QVector<QString> cells, QWidget* parent):
+MemoryDialog::MemoryDialog(const QVector<QString>& cells, QWidget* parent):
               QDialog(parent)
 {
     list = new QListWidget(this);
@@ -10,7 +10,7 @@ MemoryDialog::MemoryDialog(QVector<QString> cells, QWidget* parent):
     this->setLayout(layout);
 }
 
-void MemoryDialog::setList(QVector<QString> cells, QListWidget *listWidget)
+void MemoryDialog::setList(const QVector<QString>& cells, QListWidget *listWidget)
 {
     foreach(QString str, cells)
     {
