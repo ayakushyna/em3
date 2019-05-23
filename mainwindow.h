@@ -1,12 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QObject>
 #include <QMainWindow>
 #include <QtWidgets>
 #include "em3.h"
 #include "memory.h"
 #include "parser.h"
 #include "memorydialog.h"
+#include "tableitem.h"
 
 namespace Ui {
 class MainWindow;

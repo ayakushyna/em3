@@ -28,11 +28,10 @@ void MainWindow::setProgramTableWidget(QTableWidget* table)
 
     for(int i = 0; i < count; i++)
     {
-        QLineEdit* line = new QLineEdit(memory[i]);
-        line->setFrame(false);
-        line->setInputMask(QString("HH H HH HHHH H HH HHHH H HH HHHH"));
-        table->setCellWidget(i, 0, line);
+        TableItem* item = new TableItem(memory[i]);
+        table->setCellWidget(i, 0, item);
     }
+
 }
 
 void MainWindow::setRegistersListWidget(QListWidget* list){}
