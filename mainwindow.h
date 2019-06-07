@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "memorydialog.h"
 #include "tableitem.h"
+#include "shared_defs.h"
 
 namespace Ui {
 class MainWindow;
@@ -24,9 +25,14 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    bool digitsOnly;
+    Settings settings;
+    Parser parser;
     EM3 em3;
 
+    void initProgramTableWidget(QTableWidget* table);
     void setProgramTableWidget(QTableWidget* table);
+    void setRow(QTableWidget* table, const QString& str, int i);
     void setRegistersListWidget(QListWidget* list);
 
 private slots:
@@ -35,6 +41,7 @@ private slots:
     void on_loadButton_clicked();
     void on_enterButton_clicked();
     void on_showButton_clicked();
+    void on_digitsRadioButton_clicked(bool checked);
 };
 
 #endif // MAINWINDOW_H
