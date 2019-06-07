@@ -1,51 +1,62 @@
 #ifndef EM3_H
 #define EM3_H
 
+#include <QMap>
+#include <QVector>
 #include "memory.h"
 #include "operation.h"
 #include "commandstring.h"
-#include <QMap>
-
 
 class EM3
 {
 public:
-    EM3();
+    EM3(const Settings &settings);
     const Memory& getMemory() const;
-    void setMemory(const Memory& memory);
+    void setMemory(Memory& memory);
+    void exec();
     ~EM3();
 
 private:
+    uint8_t length;
+
+    QMap<uint16_t,void (EM3::*)()> commands;
     Memory memory;
+    Settings settings;
+    QVector<int> registers;
 
     uint16_t RA;
-    QString RC;
+    CommandString RC;
 
     bool Z;//признак нулевого результата
     bool C;//признак переноса из старшего разряда
     bool S;//знак результата
     bool O;//признак переполнения результата
 
-    static const QMap<uint16_t,Operation> commands;
+    bool Stop;
 
-    void cop00(const CommandString& str);
-    void cop01(const CommandString& str);//хранение знакового байта
-    void cop02(const CommandString& str);//хранение беззнакового байта
-    void cop03(const CommandString& str);//хранение знакового полуслова
-    void cop04(const CommandString& str);//хранение беззнакового полуслова
-    void cop05(const CommandString& str);//хранение знакового двойного слова
-    void cop06(const CommandString& str);//хранение беззнакового двойного слова
-    void cop07(const CommandString& str);//хранение знакового числа с ПТ
-    void cop08(const CommandString& str);//хранение беззнакового числа с ПТ
-    void cop09(const CommandString& str);//сложение байт
-    void cop10(const CommandString& str);//вычитание байт
-    void cop11(const CommandString& str);//сложение полуслов
-    void cop12(const CommandString& str);//вычитание полуслов
-    void cop13(const CommandString& str);//сложение двойных слов
-    void cop14(const CommandString& str);//вычитание двойных слов
-    void cop15(const CommandString& str);//сложение чисел с ПТ
-    void cop16(const CommandString& str);//вычитание чисел с ПТ
+    void cop00();
+    void cop01();
+    void cop02();
 
+    void cop1010();
+    void cop1011();
+    void cop1012();
+
+    void cop1020();
+    void cop1021();
+    void cop1022();
+
+
+    void cop1030();
+    void cop1031();
+    void cop1032();
+
+
+    void cop1040();
+    void cop1041();
+    void cop1042();
+
+    void cop1099();
 };
 
 #endif // EM3_H
