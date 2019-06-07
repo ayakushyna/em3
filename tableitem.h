@@ -5,22 +5,37 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QKeyEvent>
-#include <QRegExpValidator>
+#include "parser.h"
+#include "validator.h"
+#include "shared_defs.h"
 
 class TableItem: public QLineEdit
 {
     Q_OBJECT
 public:
-    TableItem(const QString& str, QWidget* parent = 0);
+    TableItem(const QString& str,
+              const Settings &settings,
+              const Parser& parser,
+              bool digitsOnly = true,
+              bool command = false,
+              QWidget* parent = 0);
     ~TableItem();
-
 
 protected:
     virtual void keyPressEvent(QKeyEvent* pe);
 
-
 private slots:
     void selectionSlot();
+
+public slots:
+    void inputTypeChangedSlot();
+
+private:
+    Parser parser;
+    bool digitsOnly, command;
+    uint8_t commCodeLength;
+    uint8_t numCodeLength;
+    void setMask();
 };
 
 #endif // TABLEITEM_H

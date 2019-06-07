@@ -1,27 +1,73 @@
 #include "tableitem.h"
 
-TableItem::TableItem(const QString& str, QWidget* parent): QLineEdit(str, parent)
+TableItem::TableItem(const QString& str,
+                     const Settings &settings,
+                     const Parser& parser,
+                     bool digitsOnly,
+                     bool command,
+                     QWidget* parent): QLineEdit(str, parent), parser(parser),
+                     digitsOnly(digitsOnly), command(command),
+                     commCodeLength(settings.commCodeLength),
+                     numCodeLength(settings.numCodeLength)
 {
     setFrame(false);
-    setInputMask(QString(">HH H HH HHHH H HH HHHH H HH HHHH"));
-    QObject::connect(this , &TableItem::selectionChanged, this, &TableItem::selectionSlot);
+    setMask();
 
+    if(command)
+        setValidator(new CommValidator(settings.commCodeLength));
+    else
+        setValidator(new UIntValidator(settings.numCodeLength));
+
+    QObject::connect(this , &TableItem::selectionChanged, this, &TableItem::selectionSlot);
+    QObject::connect(this , &TableItem::textChanged, this, &TableItem::inputTypeChangedSlot);
 }
+
 
 TableItem::~TableItem(){}
 
 void TableItem::keyPressEvent(QKeyEvent* ke)
 {
-    if (ke->key()!=Qt::Key_Backspace &&
-        ke->key()!=Qt::Key_Delete)
+    if(command && (ke->key()==Qt::Key_Backspace || ke->key()==Qt::Key_Delete))
     {
-       QLineEdit::keyPressEvent(ke);
+           ke->ignore();
     }
+    else
+         QLineEdit::keyPressEvent(ke);
+}
+
+void TableItem::setMask()
+{
+    if(digitsOnly)
+        setInputMask(QString(">9999 999 999 999 999 999 999"));
     else {
-        ke->ignore();
+        if(command)
+            setInputMask(QString(">AANN 999 999 999 999 999 999"));
+        else
+            setInputMask(QString(">AA99 999 999 999 999 999 999"));
     }
 }
 
+void TableItem::inputTypeChangedSlot()
+{
+    int pos = cursorPosition();
+    QString currStr = this->text();
+    bool i = parser.getCurrCommand(currStr);
+
+    if(i && i != command)
+    {
+        command = i;
+        setMask();
+        setValidator(new CommValidator(commCodeLength));
+        setCursorPosition(pos);
+    }
+    else if( !i && i != command)
+    {
+        command = i;
+        setMask();
+        setValidator(new UIntValidator(numCodeLength));
+        setCursorPosition(pos);
+    }
+}
 
 void TableItem::selectionSlot()
 {

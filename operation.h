@@ -5,7 +5,6 @@
 
 
 struct Operation{
-    QString name;
     void (*func) ();
 };
 

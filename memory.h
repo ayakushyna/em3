@@ -4,19 +4,18 @@
 #include <memory>
 #include <QVector>
 #include <QString>
-#include "parser.h"
 
 class Memory
 {
 public:
-    Memory();
+    Memory(uint8_t length);
     Memory(const QVector<QString>& cells);
     void setMemoryCells(const QVector<QString>& cells);
     const QVector<QString>& getMemoryCells() const;
     ~Memory();
 
-    QString& operator[](int index);
-    const QString& operator[](int index) const;
+    QString& operator[](uint index);
+    const QString& operator[](uint index) const;
 
     int getSize() const;
 
