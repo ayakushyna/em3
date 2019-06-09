@@ -4,6 +4,7 @@
 #include <memory>
 #include <QVector>
 #include <QString>
+#include <QtWidgets>
 
 class Memory
 {
@@ -14,13 +15,16 @@ public:
     const QVector<QString>& getMemoryCells() const;
     ~Memory();
 
-    QString& operator[](uint index);
-    const QString& operator[](uint index) const;
+    QString& operator[](uint64_t index);
+    const QString& operator[](uint64_t index) const;
 
-    int getSize() const;
+    uint64_t getSize() const;
+
+    void read(const QJsonObject&);
+    void write(QJsonObject&) const;
 
 private:
-    static const uint16_t size = 10;
+    static const uint64_t size = 512;
     QVector<QString> memoryCells;
 };
 

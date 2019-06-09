@@ -51,7 +51,7 @@ void TableItem::inputTypeChangedSlot()
 {
     int pos = cursorPosition();
     QString currStr = this->text();
-    bool i = parser.getCurrCommand(currStr);
+    bool i = parser.isCommand(currStr);
 
     if(i && i != command)
     {

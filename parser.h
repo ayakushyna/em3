@@ -16,7 +16,7 @@ public:
     QString parseToMemory(const QString& str);
     QString parseFromMemory(const QString& cell);
 
-    bool getCurrCommand(const QString &str);
+    bool isCommand(const QString &str);
 
     void setDigitsOnly( bool digitsOnly);
     bool  getDigitsOnly() const;

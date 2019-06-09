@@ -10,7 +10,7 @@
 class CommandString
 {
 private:
-    uint index;
+    uint64_t index;
 
     uint16_t commCode;
     uint16_t numCode;
@@ -24,9 +24,10 @@ private:
     uint8_t commCodeLength;
     uint8_t numCodeLength;
     uint8_t argLength;
+    uint64_t regSize;
 
 public:
-    CommandString(const Settings &settings, const QString &str, uint index);
+    CommandString(const Settings &settings, const QString &str);
 
     void setArgs(const QString &str);
     //void setArgs(QVector<uint16_t> args);
@@ -45,15 +46,12 @@ public:
     void setNumCode(const QString &str);
     uint16_t getNumCode()const;
 
-    void setIndex(uint index);
-    uint getIndex()const;
-
     int64_t getISConstant() const;
     uint64_t getIUConstant() const;
     double getDBConstant() const;
 
     QString getOperand(const Memory& memory,
-                       const QVector<int>& registers,
+                       const QVector<uint64_t>& registers,
                        uint8_t index) const;
 
     ~CommandString();

@@ -1,30 +1,21 @@
 #include "commandstring.h"
 
 
-CommandString::CommandString(const Settings &settings, const QString &str, uint index)
+CommandString::CommandString(const Settings &settings, const QString &str)
                :str(str), length(settings.length),
                 maNum(settings.maNum),
                 maLength(settings.maLength),
                 commCodeLength(settings.commCodeLength),
                 numCodeLength(settings.numCodeLength),
-                argLength(settings.argLength)
+                argLength(settings.argLength),
+                regSize(settings.regSize)
 {
-    setIndex(index);
     setCommCode(str);
     setNumCode(str);
     setMAs(str);
     setArgs(str);
 }
 
-void CommandString::setIndex(uint index)
-{
-    this->index = index;
-}
-
-uint CommandString::getIndex()const
-{
-    return this->index;
-}
 
 void CommandString::setCommCode(const QString &str)
 {
@@ -51,11 +42,10 @@ uint16_t CommandString::getNumCode()const
 void CommandString::setMAs(const QString &str)
 {
     ma.resize(maNum);
-    QString addressingStr = str.mid(commCodeLength,maNum*maLength);
 
     for(int i = 0; i < maNum; i++)
     {
-        this->ma[i] = static_cast<MA>(addressingStr[i].digitValue());
+        this->ma[i] = static_cast<MA>(str[commCodeLength + i*6].digitValue());
     }
 }
 
@@ -94,28 +84,28 @@ uint16_t CommandString::getArg(uint8_t index)const
 
 uint16_t CommandString::getReg(uint8_t index)const
 {
-    return this->args[2*(index % maNum) + 1];
+    return this->args[2*(index % maNum) + 1] % regSize;
 }
 
 int64_t CommandString::getISConstant() const
 {
-    num.ui = str.mid(2).toUInt();
+    num.ui = str.mid(numCodeLength).toULongLong();
     return num.i;
 }
 
 uint64_t CommandString::getIUConstant() const
 {
-    return str.mid(2).toUInt();
+    return str.mid(numCodeLength).toULongLong();
 }
 
 double CommandString::getDBConstant() const
 {
-    num.ui = str.mid(2).toUInt();
+    num.ui = str.mid(numCodeLength).toULongLong();
     return num.d;
 }
 
 QString CommandString::getOperand(const Memory& memory,
-                                  const QVector<int>& registers,
+                                  const QVector<uint64_t>& registers,
                                   uint8_t index) const
 {
 

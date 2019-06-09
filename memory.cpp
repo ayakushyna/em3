@@ -24,19 +24,35 @@ const QVector<QString>& Memory::getMemoryCells() const
     return this->memoryCells;
 }
 
-QString& Memory::operator[](uint index)
+QString& Memory::operator[](uint64_t index)
 {
     return memoryCells[index % size];
 }
 
-const QString& Memory::operator[](uint index) const
+const QString& Memory::operator[](uint64_t index) const
 {
     return memoryCells[index % size];
 }
 
-int Memory::getSize() const
+uint64_t Memory::getSize() const
 {
     return memoryCells.size();
+}
+
+void Memory::write(QJsonObject &json) const {
+    for(int i = 0; i < memoryCells.size(); i++)
+    {
+        json[QString::number(i)] = memoryCells[i];
+    }
+
+}
+
+void Memory::read(const QJsonObject &json){
+    for(int i = 0; i < memoryCells.size(); i++)
+    {
+        if (json.contains(QString::number(i)))
+            memoryCells[i] = json[QString::number(i)].toString();
+    }
 }
 
 Memory::~Memory(){}

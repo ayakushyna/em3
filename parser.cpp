@@ -36,7 +36,7 @@ QString Parser::parseToMemory(const QString &str)
         throw ;
 
      cell.replace(" ", "");
-     bool command = getCurrCommand(str);
+     bool command = isCommand(str);
 
      if(command)
      {
@@ -60,13 +60,13 @@ QString Parser::parseToMemory(const QString &str)
     return cell;
 }
 
-bool Parser::getCurrCommand(const QString &str)
+bool Parser::isCommand(const QString &str)
 {
     bool currCommand = false;
-    bool currDigitsOnly  = (str[0] == '1' || str[0] == '0');
+    bool currDigitsOnly  = (str[0].isDigit());
 
     if(currDigitsOnly)
-        currCommand = (str[0] == '1');
+        currCommand = (str[0] != '0');
     else
         currCommand =  (str.left(2) != "IS"
            && str.left(2) != "IU"
@@ -78,8 +78,8 @@ QString Parser::parseFromMemory(const QString &cell)
 {
     QString str = cell;
 
-    bool currDigitsOnly  = (str[0] == '1' || str[0] == '0');
-    bool command = getCurrCommand(str);
+    bool currDigitsOnly  = (str[0].isDigit());
+    bool command = isCommand(str);
 
     if(currDigitsOnly != digitsOnly && !digitsOnly)
     {
