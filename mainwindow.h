@@ -23,6 +23,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void read(const QJsonObject &json);
+    void write(QJsonObject &json) const;
+
 private:
     Ui::MainWindow *ui;
     bool digitsOnly;
@@ -37,11 +40,12 @@ private:
 
 private slots:
     void on_startButton_clicked();
-    void on_saveButton_clicked();
-    void on_loadButton_clicked();
     void on_enterButton_clicked();
     void on_showButton_clicked();
     void on_digitsRadioButton_clicked(bool checked);
+
+    void saveApp();
+    void loadApp();
 };
 
 #endif // MAINWINDOW_H
