@@ -16,17 +16,23 @@ public:
     const Memory& getMemory() const;
     void setMemory(Memory& memory);
 
+    const QVector<uint64_t>& getRegisters() const;
+
     void exec(uint64_t index);
     void init();
 
-    bool isStopped();
-    uint64_t RA;
+    bool isStopped() const;
+    bool isZero() const;
+    bool isSigned() const;
 
-    bool getInput();
+    uint64_t getRA() const;
+    void setRA(uint64_t i);
+
+    bool getInput() const;
     void setInput(bool);
     void setStrList(const QStringList& list);
 
-    bool getOutput();
+    bool getOutput() const;
     void setOutput(bool);
     const QStringList& getStrList() const;
 
@@ -41,6 +47,8 @@ private:
 
     Memory memory;
     QVector<uint64_t> registers;
+
+    uint64_t RA;
     CommandString RC;
 
     bool Z;//признак нулевого результата
@@ -61,6 +69,10 @@ private:
     void cop00();
     void cop01();
     void cop02();
+
+    void cop1000();
+    void cop1001();
+    void cop1002();
 
     void cop1100();
     void cop1101();

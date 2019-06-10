@@ -12,6 +12,10 @@ EM3::EM3(const Settings &settings):
     commands.insert(1,&EM3::cop01);
     commands.insert(2,&EM3::cop02);
 
+    commands.insert(1000,&EM3::cop1000);
+    commands.insert(1001,&EM3::cop1001);
+    commands.insert(1002,&EM3::cop1002);
+
     commands.insert(1100,&EM3::cop1100);
     commands.insert(1101,&EM3::cop1101);
     commands.insert(1102,&EM3::cop1102);
@@ -48,6 +52,10 @@ EM3::EM3(const Settings &settings):
     commands.insert(1801,&EM3::cop1801);
     commands.insert(1802,&EM3::cop1802);
 
+    commands.insert(1900,&EM3::cop1900);
+    commands.insert(1901,&EM3::cop1901);
+    commands.insert(1902,&EM3::cop1902);
+
     commands.insert(1099,&EM3::cop1099);
 }
 
@@ -60,12 +68,39 @@ void EM3::setMemory( Memory& memory)
     this->memory = memory;
 }
 
-bool EM3::isStopped()
+const QVector<uint64_t>& EM3::getRegisters() const
+{
+    return this->registers;
+}
+
+bool EM3::isStopped() const
 {
     return Stop;
 }
 
-bool EM3::getInput()
+bool EM3::isZero() const
+{
+    return Z;
+}
+
+bool EM3::isSigned() const
+{
+    return S;
+}
+
+
+uint64_t EM3::getRA() const
+{
+    return RA;
+}
+
+void EM3::setRA(uint64_t i)
+{
+    RA = i;
+}
+
+
+bool EM3::getInput()const
 {
     return Input;
 }
@@ -74,7 +109,7 @@ void EM3::setInput(bool input)
     Input = input;
 }
 
-bool EM3::getOutput()
+bool EM3::getOutput()const
 {
     return Output;
 }
@@ -131,10 +166,10 @@ void EM3::cop1099()
     Stop = true;
 }
 
-//знаковое число
+//беззнаковое число
 void EM3::cop00(){}
 
-//беззнаковое число
+//знаковое число
 void EM3::cop01(){}
 
 //вещественное число
@@ -153,6 +188,26 @@ QVector<uint64_t> EM3::getOperands() const
     return operands;
 }
 
+void EM3::saveIntegerU(uint64_t result, uint64_t address)
+{
+    Z = (result == 0);
+    S = false;
+
+    if(RC.getMA(0) == MA::RA)
+    {
+        address = address % registers.size();
+        registers[address] = result;
+    }
+    else
+    {
+        memory[address] = memory[address]
+                              .setNum(result)
+                              .rightJustified(length-2, '0');
+
+        memory[address].prepend("00");
+    }
+}
+
 void EM3::saveIntegerS(int64_t result, uint64_t address)
 {
     Z = (result == 0);
@@ -160,23 +215,20 @@ void EM3::saveIntegerS(int64_t result, uint64_t address)
 
     num.i = result;
 
-    memory[address] = memory[address]
-                          .setNum(num.ui)
-                          .rightJustified(length-2, '0');
+    if(RC.getMA(0) == MA::RA)
+    {
+        address = address % registers.size();
+        registers[address] = num.ui;
+    }
+    else
+    {
+        memory[address] = memory[address]
+                              .setNum(num.ui)
+                              .rightJustified(length-2, '0');
 
-    memory[address].prepend("00");
-}
+        memory[address].prepend("01");
+    }
 
-void EM3::saveIntegerU(uint64_t result, uint64_t address)
-{
-    Z = (result == 0);
-    S = false;
-
-    memory[address] = memory[address]
-                          .setNum(result)
-                          .rightJustified(length-2, '0');
-
-    memory[address].prepend("01");
 }
 
 void EM3::saveDouble(double result, uint64_t address)
@@ -186,33 +238,66 @@ void EM3::saveDouble(double result, uint64_t address)
 
     num.d = result;
 
-    memory[address] = memory[address]
-                          .setNum(num.ui)
-                          .rightJustified(length-2, '0');
+    if(RC.getMA(0) == MA::RA)
+    {
+        address = address % registers.size();
+        registers[address] = num.ui;
+    }
+    else
+    {
+        memory[address] = memory[address]
+                              .setNum(num.ui)
+                              .rightJustified(length-2, '0');
 
-    memory[address].prepend("02");
+        memory[address].prepend("02");
+    }
 }
 
-//сложение знаковых целых
-void EM3::cop1100()
+//присваивание беззнакового целого
+void EM3::cop1000()
 {
     QVector<uint64_t> operands = getOperands();
+    saveIntegerU(operands[2], operands[0]);
+}
 
-    num.ui = operands[0];
-    int64_t first = num.i;
-    num.ui = operands[1];
-    int64_t second = num.i;
+//присваивание знакового целого
+void EM3::cop1001()
+{
+    QVector<uint64_t> operands = getOperands();
+    num.ui = operands[2];
+    int64_t result = num.i;
+    saveIntegerS(result, operands[0]);
+}
 
-    int64_t result = first + second;
-    saveIntegerS(result, operands[2]);
+//присваивание вещественного числа
+void EM3::cop1002()
+{
+    QVector<uint64_t> operands = getOperands();
+    num.ui = operands[2];
+    double result = num.d;
+    saveDouble(result, operands[0]);
 }
 
 //сложение беззнаковых целых
+void EM3::cop1100()
+{
+    QVector<uint64_t> operands = getOperands();
+    uint64_t result = operands[1] + operands[2];
+    saveIntegerU(result, operands[0]);
+}
+
+//сложение знаковых целых
 void EM3::cop1101()
 {
     QVector<uint64_t> operands = getOperands();
-    uint64_t result = operands[0] + operands[1];
-    saveIntegerU(result, operands[2]);
+
+    num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
+    int64_t second = num.i;
+
+    int64_t result = first + second;
+    saveIntegerS(result, operands[0]);
 }
 
 //сложение вещественных
@@ -220,37 +305,37 @@ void EM3::cop1102()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    double first = num.d;
     num.ui = operands[1];
+    double first = num.d;
+    num.ui = operands[2];
     double second = num.d;
 
     double result = first + second;
-    saveDouble(result, operands[2]);
+    saveDouble(result, operands[0]);
 }
 
-//вычитание знаковых целых
+//вычитание беззнаковых целых
 void EM3::cop1200()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    int64_t first = num.i;
-    num.ui = operands[1];
-    int64_t second = num.i;
 
-    int64_t result = first - second;
-    saveIntegerS(result, operands[2]);
+    uint64_t result = operands[1] - operands[2];
+    saveIntegerU(result, operands[0]);
 }
 
-//вычитание беззнаковых целых
+//вычитание знаковых целых
 void EM3::cop1201()
 {
     QVector<uint64_t> operands = getOperands();
 
+    num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
+    int64_t second = num.i;
 
-    uint64_t result = operands[0] - operands[1];
-    saveIntegerU(result, operands[2]);
+    int64_t result = first - second;
+    saveIntegerS(result, operands[0]);
 }
 
 //вычитание вещественных
@@ -258,137 +343,119 @@ void EM3::cop1202()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    double first = num.d;
     num.ui = operands[1];
+    double first = num.d;
+    num.ui = operands[2];
     double second = num.d;
 
     double result = first - second;
-    saveDouble(result, operands[2]);
+    saveDouble(result, operands[0]);
 }
 
-//умножение знаковых целых
+
+//умножение беззнаковых целых
 void EM3::cop1300()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    int64_t first = num.i;
-    num.ui = operands[1];
-    int64_t second = num.i;
-
-    int64_t result = first * second;
-    saveIntegerS(result, operands[2]);
+    uint64_t result = operands[1] * operands[2];
+    saveIntegerU(result, operands[0]);
 }
 
-//умножение беззнаковых целых
+//умножение знаковых целых
 void EM3::cop1301()
 {
     QVector<uint64_t> operands = getOperands();
 
-    uint64_t result = operands[0] * operands[1];
-    saveIntegerU(result, operands[2]);
+    num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
+    int64_t second = num.i;
+
+    int64_t result = first * second;
+    saveIntegerS(result, operands[0]);
 }
+
 
 //умножение вещественных
 void EM3::cop1302()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    double first = num.d;
     num.ui = operands[1];
+    double first = num.d;
+    num.ui = operands[2];
     double second = num.d;
 
     double result = first * second;
-    saveDouble(result, operands[2]);
+    saveDouble(result, operands[0]);
 }
 
-//деление знаковых целых
+//деление беззнаковых целых
 void EM3::cop1400()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    int64_t first = num.i;
-    num.ui = operands[1];
-    int64_t second = num.i;
 
-    int64_t result = first / second;
-    saveIntegerS(result, operands[2]);
+    uint64_t result = operands[1] / operands[2];
+    saveIntegerU(result, operands[0]);
 }
 
-//деление беззнаковых целых
+//деление знаковых целых
 void EM3::cop1401()
 {
     QVector<uint64_t> operands = getOperands();
 
+    num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
+    int64_t second = num.i;
 
-    uint64_t result = operands[0] / operands[1];
-    saveIntegerU(result, operands[2]);
+    int64_t result = first / second;
+    saveIntegerS(result, operands[0]);
 }
 
-//деление по модулю знаковых целых
+
+//деление по модулю беззнаковых целых
 void EM3::cop1410()
 {
     QVector<uint64_t> operands = getOperands();
-
-    num.ui = operands[0];
-    int64_t first = num.i;
-    num.ui = operands[1];
-    int64_t second = num.i;
-
-    int64_t result = first % second;
-    saveIntegerS(result, operands[2]);
+    uint64_t result = operands[1] % operands[2];
+    saveIntegerU(result, operands[0]);
 }
 
-//деление по модулю беззнаковых целых
+//деление по модулю знаковых целых
 void EM3::cop1411()
 {
     QVector<uint64_t> operands = getOperands();
-    uint64_t result = operands[0] % operands[1];
-    saveIntegerU(result, operands[2]);
+
+    num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
+    int64_t second = num.i;
+
+    int64_t result = first % second;
+    saveIntegerS(result, operands[0]);
 }
+
 
 //деление вещественных
 void EM3::cop1402()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    double first = num.d;
     num.ui = operands[1];
+    double first = num.d;
+    num.ui = operands[2];
     double second = num.d;
 
     double result = first / second;
-    saveDouble(result, operands[2]);
+    saveDouble(result, operands[0]);
 }
 
-//ввод знаковых целых
-void EM3::cop1500()
-{
-    if(InOutStringList.empty())
-    {
-        Input = true;
-    }
-    else
-    {
-        QVector<uint64_t> operands = getOperands();
-        uint64_t size = operands[1];
-        resizeStrList(size);
-
-        for (uint64_t i = 0; i < size; i++)
-        {
-            int64_t result = InOutStringList[i].toLongLong();
-            saveIntegerS(result, operands[0]+i);
-        }
-
-        InOutStringList.clear();
-    }
-}
 
 //ввод беззнаковых целых
-void EM3::cop1501()
+void EM3::cop1500()
 {
     if(InOutStringList.empty())
     {
@@ -404,6 +471,29 @@ void EM3::cop1501()
         {
             uint64_t result = InOutStringList[i].toULongLong();
             saveIntegerU(result, operands[0]+i);
+        }
+
+        InOutStringList.clear();
+    }
+}
+
+//ввод знаковых целых
+void EM3::cop1501()
+{
+    if(InOutStringList.empty())
+    {
+        Input = true;
+    }
+    else
+    {
+        QVector<uint64_t> operands = getOperands();
+        uint64_t size = operands[1];
+        resizeStrList(size);
+
+        for (uint64_t i = 0; i < size; i++)
+        {
+            int64_t result = InOutStringList[i].toLongLong();
+            saveIntegerS(result, operands[0]+i);
         }
 
         InOutStringList.clear();
@@ -433,28 +523,8 @@ void EM3::cop1502()
     }
 }
 
-//вывод знаковых целых
-void EM3::cop1600()
-{
-    if(InOutStringList.empty())
-    {
-        QVector<uint64_t> operands = getOperands();
-        uint64_t size = operands[1];
-
-        for (uint64_t i = 0; i < size; i++)
-        {
-            int64_t result = CommandString(settings,
-                                           memory[operands[0]+i])
-                             .getISConstant();
-            InOutStringList << QString::number(result);
-        }
-
-        Output = true;
-    }
-}
-
 //вывод беззнаковых целых
-void EM3::cop1601()
+void EM3::cop1600()
 {
     if(InOutStringList.empty())
     {
@@ -466,6 +536,26 @@ void EM3::cop1601()
             uint64_t result = CommandString(settings,
                                            memory[operands[0]+i])
                              .getIUConstant();
+            InOutStringList << QString::number(result);
+        }
+
+        Output = true;
+    }
+}
+
+//вывод знаковых целых
+void EM3::cop1601()
+{
+    if(InOutStringList.empty())
+    {
+        QVector<uint64_t> operands = getOperands();
+        uint64_t size = operands[1];
+
+        for (uint64_t i = 0; i < size; i++)
+        {
+            int64_t result = CommandString(settings,
+                                           memory[operands[0]+i])
+                             .getISConstant();
             InOutStringList << QString::number(result);
         }
 
@@ -493,66 +583,68 @@ void EM3::cop1602()
     }
 }
 
-//из знаковых целых в беззнаковые
+//из беззнаковых целых в знаковые
 void EM3::cop1701()
 {
     QVector<uint64_t> operands = getOperands();
-    uint64_t result = CommandString(settings,
+    int64_t result = CommandString(settings,
                                    memory[operands[2]])
-                     .getISConstant();
-
-    saveIntegerU(result, operands[0]);
+                                  .getIUConstant();
+    saveIntegerS(result, operands[0]);
 }
 
-//из знаковых целых в вещественные
+//из беззнаковых целых в вещественные
 void EM3::cop1702()
 {
     QVector<uint64_t> operands = getOperands();
     double result = CommandString(settings,
                                    memory[operands[2]])
-                     .getISConstant();
+                                  .getIUConstant();
     saveDouble(result, operands[0]);
 }
 
-//из беззнаковых целых в знаковые
+
+//из знаковых целых в беззнаковые
 void EM3::cop1710()
 {
     QVector<uint64_t> operands = getOperands();
-    int64_t result = CommandString(settings,
-                                   memory[operands[2]])
-                     .getIUConstant();
-    saveIntegerS(result, operands[0]);
+    uint64_t result = CommandString(settings,
+                                    memory[operands[2]])
+                                    .getISConstant();
+
+    saveIntegerU(result, operands[0]);
 }
 
-//из беззнаковых целых в вещественные
+//из знаковых целых в вещественные
 void EM3::cop1712()
 {
     QVector<uint64_t> operands = getOperands();
     double result = CommandString(settings,
-                                   memory[operands[2]])
-                     .getIUConstant();
+                                  memory[operands[2]])
+                                  .getISConstant();
     saveDouble(result, operands[0]);
 }
 
-//из вещественных  в знаковые
+//из вещественных в беззнаковые
 void EM3::cop1720()
+{
+    QVector<uint64_t> operands = getOperands();
+    uint64_t result = CommandString(settings,
+                                    memory[operands[2]])
+                                    .getDBConstant();
+    saveIntegerU(result, operands[0]);
+}
+
+//из вещественных  в знаковые
+void EM3::cop1721()
 {
     QVector<uint64_t> operands = getOperands();
     int64_t result = CommandString(settings,
                                    memory[operands[2]])
-                     .getDBConstant();
+                                   .getDBConstant();
     saveIntegerS(result, operands[0]);
 }
 
-//из вещественных в беззнаковые
-void EM3::cop1721()
-{
-    QVector<uint64_t> operands = getOperands();
-    uint64_t result = CommandString(settings,
-                                   memory[operands[2]])
-                     .getDBConstant();
-    saveIntegerU(result, operands[0]);
-}
 
 //безусловный переход
 void EM3::cop1801()
@@ -573,26 +665,26 @@ void EM3::cop1802()
         RA = operands[2] - 1;
 }
 
-//сравнение знаковых целых
+//сравнение беззнаковых целых
 void EM3::cop1900()
 {
     QVector<uint64_t> operands = getOperands();
+    Z = (operands[1] == operands[2]);
+    S = (operands[1] < operands[2]);
+}
 
-    num.ui = operands[0];
-    int64_t first = num.i;
+//сравнение знаковых целых
+void EM3::cop1901()
+{
+    QVector<uint64_t> operands = getOperands();
+
     num.ui = operands[1];
+    int64_t first = num.i;
+    num.ui = operands[2];
     int64_t second = num.i;
 
     Z = (first == second);
     S = (first < second);
-}
-
-//сравнение беззнаковых целых
-void EM3::cop1901()
-{
-    QVector<uint64_t> operands = getOperands();
-    Z = (operands[0] == operands[1]);
-    S = (operands[0] < operands[1]);
 }
 
 //сравнение вещественных
@@ -600,9 +692,9 @@ void EM3::cop1902()
 {
     QVector<uint64_t> operands = getOperands();
 
-    num.ui = operands[0];
-    double first = num.d;
     num.ui = operands[1];
+    double first = num.d;
+    num.ui = operands[2];
     double second = num.d;
 
     Z = (first == second);

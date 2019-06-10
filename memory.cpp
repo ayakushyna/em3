@@ -42,7 +42,7 @@ uint64_t Memory::getSize() const
 void Memory::write(QJsonObject &json) const {
     for(int i = 0; i < memoryCells.size(); i++)
     {
-        json[QString::number(i)] = memoryCells[i];
+        json[(i < 10? "00": i <100? "0":"")+QString::number(i)] = memoryCells[i];
     }
 
 }
@@ -50,8 +50,8 @@ void Memory::write(QJsonObject &json) const {
 void Memory::read(const QJsonObject &json){
     for(int i = 0; i < memoryCells.size(); i++)
     {
-        if (json.contains(QString::number(i)))
-            memoryCells[i] = json[QString::number(i)].toString();
+        if (json.contains((i < 10? "00": i <100? "0":"")+QString::number(i)))
+            memoryCells[i] = json[(i < 10? "00": i <100? "0":"")+QString::number(i)].toString();
     }
 }
 
