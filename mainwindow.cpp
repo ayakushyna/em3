@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionOpen,SIGNAL(triggered()),this, SLOT(loadApp()));
     connect(ui->actionSave,SIGNAL(triggered()),this, SLOT(saveApp()));
+    connect(ui->actionInfo,SIGNAL(triggered()),this, SLOT(infoDialog()));
 
     ui->digitsRadioButton->setChecked(true);
 
@@ -20,12 +21,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->enterButton->setEnabled(false);
 
     initProgramTableWidget(ui->programTableWidget);
-    setRegistersListWidget(ui->registersListWidget);
+    initRegistersListWidget(ui->registersListWidget);
 
     ui->inputTextEdit->setEnabled(false);
     ui->outputTextEdit->setEnabled(false);
 }
-
 
 void MainWindow::setRow(QTableWidget* table, const QString& str, int i)
 {
@@ -41,14 +41,17 @@ void MainWindow::initProgramTableWidget(QTableWidget* table)
     int count = memory.getSize();
     table->setRowCount(count);
 
-    QStringList addresses;
+    QStringList header;
+    header << "CODE ARG AD1 ARG AD2 ARG AD3";
 
+    QStringList addresses;
     for(int i = 0; i < count; i++)
     {
-        addresses << QString::number(i);;
+        addresses << (i < 10? "00": i <100? "0":"") + QString::number(i);
         setRow(table,memory[i],i);
     }
 
+    table->setHorizontalHeaderLabels(header);
     table->setVerticalHeaderLabels(addresses);
 }
 
@@ -58,7 +61,7 @@ void MainWindow::setProgramTableWidget(QTableWidget* table)
 
     for(int i = 0; i < count; i++)
     {
-        QString str = dynamic_cast<QLineEdit*>(table->cellWidget(i,0))->text();
+        QString str = dynamic_cast<TableItem*>(table->cellWidget(i,0))->text();
         str.replace(" ", "");
         setRow(table,str,i);
     }
@@ -66,7 +69,27 @@ void MainWindow::setProgramTableWidget(QTableWidget* table)
 }
 
 
-void MainWindow::setRegistersListWidget(QListWidget* list){}
+void MainWindow::initRegistersListWidget(QListWidget* list)
+{
+    list->clear();
+    QVector<uint64_t> registers = em3.getRegisters();
+    int count = registers.size();
+
+    list->addItem("Z   :"+ QString::number(em3.isZero()));
+    list->addItem("S   :"+ QString::number(em3.isSigned()));
+
+    list->addItem("RA  :"+QString::number(em3.getRA())
+                  .rightJustified(settings.length-2, '0'));
+
+    for (int i = 0; i < count; i++)
+    {
+        list->addItem("RG"+(i < 10? "0"+QString::number(i): QString::number(i))+":"
+                      +QString::number(registers[i])
+                      .rightJustified(settings.length-2, '0'));
+    }
+
+
+}
 
 MainWindow::~MainWindow()
 {
@@ -75,27 +98,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    QTableWidget* table = ui->programTableWidget;
-    QVector<QString> cells;
-
-    for(int i = 0; i < table->rowCount(); i++)
-    {
-        QString str = dynamic_cast<QLineEdit*>(table->cellWidget(i,0))->text();
-        str = parser.parseToMemory(str);
-        cells.append(str);
-    }
-
-    Memory memory(cells);
-    em3.setMemory(memory);
-    uint64_t size = memory.getSize();
+    on_storeButton_clicked();
+    uint64_t size = em3.getMemory().getSize();
 
     em3.init();
-    for(em3.RA = 0; em3.isStopped() != true && em3.RA < size; em3.RA++)
+    for(em3.setRA(0); em3.isStopped() != true && em3.getRA() < size; em3.setRA(em3.getRA()+ 1))
     {
-        bool command = parser.isCommand(em3.getMemory()[em3.RA]);
+        bool command = parser.isCommand(em3.getMemory()[em3.getRA()]);
         if(command)
         {
-            em3.exec(em3.RA);
+            em3.exec(em3.getRA());
 
             if(em3.getInput())
             {
@@ -110,7 +122,7 @@ void MainWindow::on_startButton_clicked()
                     on_enterButton_clicked();
                 });
                 loop.exec();
-                em3.exec(em3.RA);
+                em3.exec(em3.getRA());
 
                 ui->inputTextEdit->clear();
                 ui->inputTextEdit->setEnabled(false);
@@ -127,6 +139,7 @@ void MainWindow::on_startButton_clicked()
     }
 
     initProgramTableWidget(ui->programTableWidget);
+    initRegistersListWidget(ui->registersListWidget);
     ui->showButton->setEnabled(true);
 }
 
@@ -153,9 +166,9 @@ void MainWindow::saveApp()
 }
 
 void MainWindow::write(QJsonObject &json) const{
-    QJsonObject memoryObject;
-    em3.write(memoryObject);
-    json["memory"] = memoryObject;
+    QJsonObject em3Object;
+    em3.write(em3Object);
+    json["em3"] = em3Object;
 }
 
 void MainWindow::loadApp()
@@ -174,10 +187,10 @@ void MainWindow::loadApp()
 
 void MainWindow::read(const QJsonObject &json){
 
-    if (json.contains("memory"))
+    if (json.contains("em3"))
     {
-            QJsonObject memoryObject = json["memory"].toObject();
-            em3.read(memoryObject);
+            QJsonObject em3Object = json["em3"].toObject();
+            em3.read(em3Object);
     }
 
     initProgramTableWidget(ui->programTableWidget);
@@ -202,9 +215,45 @@ void MainWindow::on_showButton_clicked()
 }
 
 
+void MainWindow::infoDialog()
+{
+    QDialog* dialog = new QDialog(this);
+    QHBoxLayout *layout = new QHBoxLayout(dialog);
+    QTextBrowser *textBrowser = new QTextBrowser(dialog);
+    textBrowser->setSource(QUrl("qrc:/commands.html"));
+    layout->addWidget(textBrowser);
+    dialog->setLayout(layout);
+    dialog->setModal(false);
+    dialog->setFixedSize(QSize(800,800));
+    dialog->show();
+}
+
 void MainWindow::on_digitsRadioButton_clicked(bool checked)
 {
     digitsOnly = checked;
     parser.setDigitsOnly(digitsOnly);
     setProgramTableWidget(ui->programTableWidget);
+}
+
+void MainWindow::on_storeButton_clicked()
+{
+    QTableWidget* table = ui->programTableWidget;
+    QVector<QString> cells;
+
+    for(int i = 0; i < table->rowCount(); i++)
+    {
+        QString str = dynamic_cast<TableItem*>(table->cellWidget(i,0))->text();
+        str = parser.parseToMemory(str);
+        cells.append(str);
+    }
+
+    Memory memory(cells);
+    em3.setMemory(memory);
+}
+
+void MainWindow::on_clearButton_clicked()
+{
+    em3 = EM3(settings);
+    initProgramTableWidget(ui->programTableWidget);
+    initRegistersListWidget(ui->registersListWidget);
 }

@@ -36,16 +36,19 @@ private:
     void initProgramTableWidget(QTableWidget* table);
     void setProgramTableWidget(QTableWidget* table);
     void setRow(QTableWidget* table, const QString& str, int i);
-    void setRegistersListWidget(QListWidget* list);
+    void initRegistersListWidget(QListWidget* list);
 
 private slots:
     void on_startButton_clicked();
     void on_enterButton_clicked();
     void on_showButton_clicked();
+    void on_storeButton_clicked();
+    void on_clearButton_clicked();
     void on_digitsRadioButton_clicked(bool checked);
 
     void saveApp();
     void loadApp();
+    void infoDialog();
 };
 
 #endif // MAINWINDOW_H
