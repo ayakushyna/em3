@@ -13,17 +13,17 @@ enum MA { ImA, DA, RA, IRA, BRA, IA};
 
 struct Settings
 {
-    const uint64_t regSize = 32;
-    const uint64_t memSize = 512;
+    static const uint64_t regSize = 32;
+    static const uint64_t memSize = 512;
 
-    const uint8_t maNum = 3;
-    const uint8_t maLength = 1;
-    const uint8_t argLength = 3;
+    static const uint8_t maNum = 3;
+    static const uint8_t maLength = 1;
+    static const uint8_t argLength = 3;
 
-    const uint8_t commCodeLength = 4;
-    const uint8_t numCodeLength = 2;
+    static const uint8_t commCodeLength = 4;
+    static const uint8_t numCodeLength = 2;
 
-    const uint8_t length = 22;
+    static const uint8_t length = 22;
 };
 
 enum Number {Integer, UInteger, Double};

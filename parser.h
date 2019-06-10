@@ -7,8 +7,6 @@
 #include "exception"
 #include "shared_defs.h"
 
-
-
 class Parser
 {
 public:
@@ -29,6 +27,9 @@ private:
     uint8_t commCodeLength;
     bool digitsOnly;
     QMap<QString,QString> codes;//key = word, value = code
+
+    void toDigits(QString &cell);
+    void toLetters(QString &cell);
 
 };
 

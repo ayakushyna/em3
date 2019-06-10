@@ -10,8 +10,8 @@ CommValidator::~CommValidator(){}
 QValidator::State CommValidator::validate(QString &input, int &pos) const
 {
     QString maLimit = "5";
-    QString memoryLimit = "512";
-    QString regLimit = "32";
+    QString memoryLimit = "511";
+    QString regLimit = "31";
 
     int i = commCodeLength + 1;
     for(int j = 0; j < 3; j++)
