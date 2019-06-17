@@ -1,5 +1,26 @@
 <RCC>
     <qresource prefix="/">
         <file>commands.html</file>
+        <file>../../Desktop/icon-education-28.jpg</file>
+        <file>images/icon-education.jpg</file>
+        <file>commandstring.cpp</file>
+        <file>commandstring.h</file>
+        <file>em3.cpp</file>
+        <file>em3.h</file>
+        <file>main.cpp</file>
+        <file>mainwindow.cpp</file>
+        <file>mainwindow.h</file>
+        <file>memory.cpp</file>
+        <file>memory.h</file>
+        <file>memorydialog.cpp</file>
+        <file>memorydialog.h</file>
+        <file>operation.h</file>
+        <file>parser.cpp</file>
+        <file>parser.h</file>
+        <file>shared_defs.h</file>
+        <file>tableitem.cpp</file>
+        <file>tableitem.h</file>
+        <file>validator.cpp</file>
+        <file>validator.h</file>
     </qresource>
 </RCC>

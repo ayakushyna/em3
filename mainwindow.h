@@ -10,6 +10,7 @@
 #include "memorydialog.h"
 #include "tableitem.h"
 #include "shared_defs.h"
+#include <exception>
 
 namespace Ui {
 class MainWindow;

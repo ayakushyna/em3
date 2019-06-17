@@ -4,9 +4,8 @@
 #include <QMap>
 #include <QVector>
 #include "memory.h"
-#include "operation.h"
 #include "commandstring.h"
-
+#include <exception>
 class EM3
 {
 public:

@@ -115,7 +115,7 @@ QString Parser::parseToMemory(const QString &str)
 {
     QString cell = str;
     if(cell.isEmpty())
-        throw ;
+        throw std::logic_error("Cell is empty");
 
      cell.replace(" ", "");
 
@@ -123,10 +123,10 @@ QString Parser::parseToMemory(const QString &str)
         toDigits(cell);
 
     if(cell.contains(QRegExp("\\D")))
-        throw ;
+        throw std::logic_error("Cell contains non digit");
 
     if(cell.length() > length)
-        throw ;
+        throw std::logic_error("Invalid length");
 
     return cell;
 }

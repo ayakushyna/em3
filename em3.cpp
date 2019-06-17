@@ -61,16 +61,16 @@ EM3::EM3(const Settings &settings):
 
 const Memory& EM3::getMemory() const
 {
-    return this->memory;
+    return memory;
 }
 void EM3::setMemory( Memory& memory)
 {
-    this->memory = memory;
+    memory = memory;
 }
 
 const QVector<uint64_t>& EM3::getRegisters() const
 {
-    return this->registers;
+    return registers;
 }
 
 bool EM3::isStopped() const
@@ -195,7 +195,7 @@ void EM3::saveIntegerU(uint64_t result, uint64_t address)
 
     if(RC.getMA(0) == MA::RA)
     {
-        address = address % registers.size();
+        address = RC.getReg(0);
         registers[address] = result;
     }
     else
@@ -217,7 +217,7 @@ void EM3::saveIntegerS(int64_t result, uint64_t address)
 
     if(RC.getMA(0) == MA::RA)
     {
-        address = address % registers.size();
+        address = RC.getReg(0);
         registers[address] = num.ui;
     }
     else
@@ -240,7 +240,7 @@ void EM3::saveDouble(double result, uint64_t address)
 
     if(RC.getMA(0) == MA::RA)
     {
-        address = address % registers.size();
+        address = RC.getReg(0);
         registers[address] = num.ui;
     }
     else
@@ -396,6 +396,8 @@ void EM3::cop1400()
 {
     QVector<uint64_t> operands = getOperands();
 
+    if(operands[2]==0)
+        throw std::logic_error("Divide by zero.");
 
     uint64_t result = operands[1] / operands[2];
     saveIntegerU(result, operands[0]);
@@ -411,6 +413,9 @@ void EM3::cop1401()
     num.ui = operands[2];
     int64_t second = num.i;
 
+    if(second==0)
+        throw std::logic_error("Divide by zero.");
+
     int64_t result = first / second;
     saveIntegerS(result, operands[0]);
 }
@@ -420,6 +425,10 @@ void EM3::cop1401()
 void EM3::cop1410()
 {
     QVector<uint64_t> operands = getOperands();
+
+    if(operands[2]==0)
+        throw std::logic_error("Divide by zero.");
+
     uint64_t result = operands[1] % operands[2];
     saveIntegerU(result, operands[0]);
 }
@@ -433,6 +442,9 @@ void EM3::cop1411()
     int64_t first = num.i;
     num.ui = operands[2];
     int64_t second = num.i;
+
+    if(second==0)
+        throw std::logic_error("Divide by zero.");
 
     int64_t result = first % second;
     saveIntegerS(result, operands[0]);
@@ -448,6 +460,9 @@ void EM3::cop1402()
     double first = num.d;
     num.ui = operands[2];
     double second = num.d;
+
+    if(second==0)
+        throw std::logic_error("Divide by zero.");
 
     double result = first / second;
     saveDouble(result, operands[0]);
@@ -714,7 +729,9 @@ void EM3::read(const QJsonObject &json){
     {
         QJsonObject memoryObject = json["memory"].toObject();
         memory.read(memoryObject);
-
+    }
+    else {
+        throw std::logic_error("Invalid data");
     }
 }
 

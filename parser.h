@@ -6,7 +6,7 @@
 #include <QVector>
 #include "exception"
 #include "shared_defs.h"
-
+#include <exception>
 class Parser
 {
 public:

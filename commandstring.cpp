@@ -8,6 +8,7 @@ CommandString::CommandString(const Settings &settings, const QString &str)
                 commCodeLength(settings.commCodeLength),
                 numCodeLength(settings.numCodeLength),
                 argLength(settings.argLength),
+                regLength(settings.regLength),
                 regSize(settings.regSize)
 {
     setCommCode(str);
@@ -61,14 +62,17 @@ const MA& CommandString::getMA(uint8_t index)const
 
 void CommandString::setArgs(const QString &str)
 {
-    int argsNum = maNum*2;
-    args.resize(argsNum);
+    args.resize(maNum*2);
 
-    for(int i = 0; i < argsNum; i++)
+    for(int i = 0; i < maNum; i++)
     {
-        int index = commCodeLength + maNum*maLength + i*argLength;
-        QString argStr = str.mid(index,argLength);
-        this->args[i] = argStr.toUShort();
+        int index = commCodeLength + 1 + i*6;
+
+        QString regStr = str.mid(index,regLength);
+        this->args[i*2] = regStr.toUShort();
+
+        QString argStr = str.mid(index+regLength,argLength);
+        this->args[i*2+1] = argStr.toUShort();
     }
 }
 
@@ -79,12 +83,12 @@ const QVector<uint16_t>& CommandString::getArgs() const
 
 uint16_t CommandString::getArg(uint8_t index)const
 {
-    return this->args[2*(index % maNum)];
+    return this->args[2*(index % maNum) + 1];
 }
 
 uint16_t CommandString::getReg(uint8_t index)const
 {
-    return this->args[2*(index % maNum) + 1] % regSize;
+    return this->args[2*(index % maNum)] % regSize;
 }
 
 int64_t CommandString::getISConstant() const

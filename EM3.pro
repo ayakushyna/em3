@@ -31,7 +31,9 @@ SOURCES += \
     memory.cpp \
     em3.cpp \
     memorydialog.cpp \
-    parser.cpp
+    parser.cpp \
+    tableitem.cpp \
+    validator.cpp
 
 HEADERS += \
     commandstring.h \
@@ -39,8 +41,10 @@ HEADERS += \
     memory.h \
     em3.h \
     memorydialog.h \
-    operation.h \
-    parser.h
+    parser.h \
+    shared_defs.h \
+    tableitem.h \
+    validator.h
 
 FORMS += \
         mainwindow.ui
@@ -49,3 +53,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

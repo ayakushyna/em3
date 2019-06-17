@@ -25,6 +25,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->inputTextEdit->setEnabled(false);
     ui->outputTextEdit->setEnabled(false);
+
+    setAttribute( Qt::WA_DeleteOnClose, true );
+    setFixedSize(995,570);
+    statusBar()->setSizeGripEnabled(false);
+    setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
+
 }
 
 void MainWindow::setRow(QTableWidget* table, const QString& str, int i)
@@ -42,7 +48,7 @@ void MainWindow::initProgramTableWidget(QTableWidget* table)
     table->setRowCount(count);
 
     QStringList header;
-    header << "CODE ARG AD1 ARG AD2 ARG AD3";
+    header << "CODE ARG OP1 ARG OP2 ARG OP3";
 
     QStringList addresses;
     for(int i = 0; i < count; i++)
@@ -98,48 +104,56 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    on_storeButton_clicked();
-    uint64_t size = em3.getMemory().getSize();
-
-    em3.init();
-    for(em3.setRA(0); em3.isStopped() != true && em3.getRA() < size; em3.setRA(em3.getRA()+ 1))
+    try
     {
-        bool command = parser.isCommand(em3.getMemory()[em3.getRA()]);
-        if(command)
+        on_storeButton_clicked();
+        uint64_t size = em3.getMemory().getSize();
+
+        em3.init();
+        for(em3.setRA(0); em3.isStopped() != true && em3.getRA() < size; em3.setRA(em3.getRA()+ 1))
         {
-            em3.exec(em3.getRA());
-
-            if(em3.getInput())
+            bool command = parser.isCommand(em3.getMemory()[em3.getRA()]);
+            if(command)
             {
-                ui->inputTextEdit->setEnabled(true);
-                ui->enterButton->setEnabled(true);
+                    em3.exec(em3.getRA());
 
-                QEventLoop loop;
-                connect(ui->enterButton, &QPushButton::clicked,
-                        [&]()
-                {
-                    loop.quit();
-                    on_enterButton_clicked();
-                });
-                loop.exec();
-                em3.exec(em3.getRA());
+                    if(em3.getInput())
+                    {
+                        ui->inputTextEdit->setEnabled(true);
+                        ui->enterButton->setEnabled(true);
 
-                ui->inputTextEdit->clear();
-                ui->inputTextEdit->setEnabled(false);
-                ui->enterButton->setEnabled(false);
-            }
+                        QEventLoop loop;
+                        connect(ui->enterButton, &QPushButton::clicked,
+                                [&]()
+                        {
+                            loop.quit();
+                            on_enterButton_clicked();
+                        });
+                        loop.exec();
+                        em3.exec(em3.getRA());
 
-            else if(em3.getOutput())
-            {
-                ui->outputTextEdit->setPlainText(em3.getStrList().join('\n'));
-                em3.setOutput(false);
-                em3.setStrList(QStringList());
+                        ui->inputTextEdit->clear();
+                        ui->inputTextEdit->setEnabled(false);
+                        ui->enterButton->setEnabled(false);
+                    }
+
+                    else if(em3.getOutput())
+                    {
+                        ui->outputTextEdit->setPlainText(em3.getStrList().join('\n'));
+                        em3.setOutput(false);
+                        em3.setStrList(QStringList());
+                    }
+
             }
         }
-    }
 
-    initProgramTableWidget(ui->programTableWidget);
-    initRegistersListWidget(ui->registersListWidget);
+        initProgramTableWidget(ui->programTableWidget);
+        initRegistersListWidget(ui->registersListWidget);
+    }
+    catch (std::exception& e)
+    {
+        ui->outputTextEdit->setPlainText(e.what());
+    }
     ui->showButton->setEnabled(true);
 }
 

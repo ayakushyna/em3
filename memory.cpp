@@ -52,6 +52,9 @@ void Memory::read(const QJsonObject &json){
     {
         if (json.contains((i < 10? "00": i <100? "0":"")+QString::number(i)))
             memoryCells[i] = json[(i < 10? "00": i <100? "0":"")+QString::number(i)].toString();
+        else {
+            throw std::logic_error("Invalid data");
+        }
     }
 }
 

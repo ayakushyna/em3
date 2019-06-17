@@ -24,6 +24,7 @@ private:
     uint8_t commCodeLength;
     uint8_t numCodeLength;
     uint8_t argLength;
+    uint8_t regLength;
     uint64_t regSize;
 
 public:
