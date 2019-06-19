@@ -13,12 +13,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionOpen,SIGNAL(triggered()),this, SLOT(loadApp()));
     connect(ui->actionSave,SIGNAL(triggered()),this, SLOT(saveApp()));
+    connect(ui->actionAbout,SIGNAL(triggered()),this, SLOT(aboutApp()));
     connect(ui->actionInfo,SIGNAL(triggered()),this, SLOT(infoDialog()));
 
-    ui->digitsRadioButton->setChecked(true);
+    ui->digitsOnlyCheckBox->setChecked(true);
 
     ui->showButton->setEnabled(false);
     ui->enterButton->setEnabled(false);
+    ui->stopButton->setEnabled(false);
+    ui->stepButton->setEnabled(false);
 
     initProgramTableWidget(ui->programTableWidget);
     initRegistersListWidget(ui->registersListWidget);
@@ -33,12 +36,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-void MainWindow::setRow(QTableWidget* table, const QString& str, int i)
+void MainWindow::setRow(QTableWidget* table, int i, const QString& str, bool checked)
 {
     QString cell = parser.parseFromMemory(str);
     bool command = parser.isCommand(cell);
+
     TableItem* item = new TableItem(cell, settings, parser, digitsOnly, command, table);
-    table->setCellWidget(i, 0, item);
+    table->setCellWidget(i, 1, item);
+
+    QRadioButton* button = new QRadioButton();
+    button->setChecked(checked);
+    button->setAutoExclusive(false);
+    table->setCellWidget(i,0,button);
 }
 
 void MainWindow::initProgramTableWidget(QTableWidget* table)
@@ -48,31 +57,51 @@ void MainWindow::initProgramTableWidget(QTableWidget* table)
     table->setRowCount(count);
 
     QStringList header;
-    header << "CODE ARG OP1 ARG OP2 ARG OP3";
+    header << "" << "CODE ARG OP1 ARG OP2 ARG OP3";
 
     QStringList addresses;
     for(int i = 0; i < count; i++)
     {
         addresses << (i < 10? "00": i <100? "0":"") + QString::number(i);
-        setRow(table,memory[i],i);
+        setRow(table,i, memory[i]);
     }
 
     table->setHorizontalHeaderLabels(header);
     table->setVerticalHeaderLabels(addresses);
 }
 
-void MainWindow::setProgramTableWidget(QTableWidget* table)
+
+
+void MainWindow::editMemoryCells(QTableWidget* table)
 {
     int count = table->rowCount();
 
     for(int i = 0; i < count; i++)
     {
-        QString str = dynamic_cast<TableItem*>(table->cellWidget(i,0))->text();
-        str.replace(" ", "");
-        setRow(table,str,i);
+        QString str = dynamic_cast<TableItem*>(table->cellWidget(i,1))->text();
+        bool checked =  dynamic_cast<QRadioButton*>(table->cellWidget(i,0))->isChecked();
+        setRow(table,i,str, checked);
     }
 
 }
+
+void MainWindow::updateMemoryCells(QTableWidget* table)
+{
+    Memory memory = em3.getMemory();
+    int count = table->rowCount();
+
+    QStringList addresses;
+    for(int i = 0; i < count; i++)
+    {
+        addresses << (i < 10? "00": i <100? "0":"") + QString::number(i);
+        QString str = memory[i];
+        bool checked =  dynamic_cast<QRadioButton*>(table->cellWidget(i,0))->isChecked();
+        setRow(table,i,str, checked);
+    }
+
+    table->setVerticalHeaderLabels(addresses);
+}
+
 
 
 void MainWindow::initRegistersListWidget(QListWidget* list)
@@ -83,7 +112,6 @@ void MainWindow::initRegistersListWidget(QListWidget* list)
 
     list->addItem("Z   :"+ QString::number(em3.isZero()));
     list->addItem("S   :"+ QString::number(em3.isSigned()));
-
     list->addItem("RA  :"+QString::number(em3.getRA())
                   .rightJustified(settings.length-2, '0'));
 
@@ -102,59 +130,100 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_startButton_clicked()
+void MainWindow::step()
 {
     try
     {
-        on_storeButton_clicked();
-        uint64_t size = em3.getMemory().getSize();
-
-        em3.init();
-        for(em3.setRA(0); em3.isStopped() != true && em3.getRA() < size; em3.setRA(em3.getRA()+ 1))
+        bool command = parser.isCommand(em3.getMemory()[em3.getRA()]);
+        if(command)
         {
-            bool command = parser.isCommand(em3.getMemory()[em3.getRA()]);
-            if(command)
+            em3.exec(em3.getRA());
+
+            if(em3.getInput())
             {
-                    em3.exec(em3.getRA());
+                ui->inputTextEdit->setEnabled(true);
+                ui->enterButton->setEnabled(true);
 
-                    if(em3.getInput())
-                    {
-                        ui->inputTextEdit->setEnabled(true);
-                        ui->enterButton->setEnabled(true);
+                QEventLoop loop;
+                connect(ui->enterButton, &QPushButton::clicked,
+                        [&]()
+                {
+                    loop.quit();
+                    on_enterButton_clicked();
+                });
+                loop.exec();
+                em3.exec(em3.getRA());
 
-                        QEventLoop loop;
-                        connect(ui->enterButton, &QPushButton::clicked,
-                                [&]()
-                        {
-                            loop.quit();
-                            on_enterButton_clicked();
-                        });
-                        loop.exec();
-                        em3.exec(em3.getRA());
-
-                        ui->inputTextEdit->clear();
-                        ui->inputTextEdit->setEnabled(false);
-                        ui->enterButton->setEnabled(false);
-                    }
-
-                    else if(em3.getOutput())
-                    {
-                        ui->outputTextEdit->setPlainText(em3.getStrList().join('\n'));
-                        em3.setOutput(false);
-                        em3.setStrList(QStringList());
-                    }
-
+                ui->inputTextEdit->clear();
+                ui->inputTextEdit->setEnabled(false);
+                ui->enterButton->setEnabled(false);
             }
-        }
 
-        initProgramTableWidget(ui->programTableWidget);
-        initRegistersListWidget(ui->registersListWidget);
+            else if(em3.getOutput())
+            {
+                ui->outputTextEdit->setPlainText(em3.getStrList().join('\n'));
+                em3.setOutput(false);
+                em3.setStrList(QStringList());
+            }
+
+        }
+        em3.setRA(em3.getRA()+ 1);
+
     }
     catch (std::exception& e)
     {
         ui->outputTextEdit->setPlainText(e.what());
     }
+}
+
+void MainWindow::on_stepButton_clicked()
+{
+    step();
+
+    updateMemoryCells(ui->programTableWidget);
+    initRegistersListWidget(ui->registersListWidget);
+
+    if(!em3.isStopped())
+    {
+        dynamic_cast<QRadioButton*>(ui->programTableWidget->cellWidget(em3.getRA(),0))->setFocus();
+        ui->programTableWidget->setVerticalHeaderItem(em3.getRA(), new QTableWidgetItem("->"));
+    }
+    else
+    {
+        ui->stepButton->setEnabled(false);
+        ui->stopButton->setEnabled(false);
+    }
+}
+
+void MainWindow::on_startButton_clicked()
+{
+    on_storeButton_clicked();
+    ui->outputTextEdit->clear();
+    ui->stepButton->setEnabled(false);
+    ui->stopButton->setEnabled(false);
+
+    em3.init();
+    uint64_t size = em3.getMemory().getSize();
+    initRegistersListWidget(ui->registersListWidget);
+
+    while(em3.isStopped() != true && em3.getRA() < size)
+    {
+        bool checked = dynamic_cast<QRadioButton*>(ui->programTableWidget->cellWidget(em3.getRA(),0))->isChecked();
+
+        if(checked)
+        {
+            ui->stepButton->setEnabled(true);
+            ui->stopButton->setEnabled(true);
+            break;
+        }
+        else
+            step();
+    }
+
+    updateMemoryCells(ui->programTableWidget);
+    initRegistersListWidget(ui->registersListWidget);
     ui->showButton->setEnabled(true);
+
 }
 
 void MainWindow::saveApp()
@@ -196,18 +265,32 @@ void MainWindow::loadApp()
 
     QByteArray saveData = loadFile.readAll();
     QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
-    read(loadDoc.object());
+
+    try {
+        read(loadDoc.object());
+    }
+    catch (std::exception& e)
+    {
+        ui->outputTextEdit->setPlainText(e.what());
+    }
+
 }
 
 void MainWindow::read(const QJsonObject &json){
+
+    on_clearButton_clicked();
 
     if (json.contains("em3"))
     {
             QJsonObject em3Object = json["em3"].toObject();
             em3.read(em3Object);
     }
+    else {
+        throw std::logic_error("Invalid data");
+    }
 
     initProgramTableWidget(ui->programTableWidget);
+
 }
 
 void MainWindow::on_enterButton_clicked()
@@ -219,8 +302,7 @@ void MainWindow::on_enterButton_clicked()
 
 void MainWindow::on_showButton_clicked()
 {
-    QVector<QString> cells = em3.getMemory()
-                             .getMemoryCells();
+    QVector<QString> cells = em3.getMemory().getMemoryCells();
 
     MemoryDialog* dialog = new MemoryDialog(cells, this);
     dialog->setModal(true);
@@ -238,31 +320,37 @@ void MainWindow::infoDialog()
     layout->addWidget(textBrowser);
     dialog->setLayout(layout);
     dialog->setModal(false);
+    dialog->setWindowTitle("Commands");
     dialog->setFixedSize(QSize(800,800));
     dialog->show();
 }
 
-void MainWindow::on_digitsRadioButton_clicked(bool checked)
-{
-    digitsOnly = checked;
-    parser.setDigitsOnly(digitsOnly);
-    setProgramTableWidget(ui->programTableWidget);
+void MainWindow::aboutApp(){
+    QMessageBox::about(this, "About", "Это приложение создано студенткой 2 курса КИ Якушиной Анастасией");
 }
+
 
 void MainWindow::on_storeButton_clicked()
 {
-    QTableWidget* table = ui->programTableWidget;
-    QVector<QString> cells;
-
-    for(int i = 0; i < table->rowCount(); i++)
+    try
     {
-        QString str = dynamic_cast<TableItem*>(table->cellWidget(i,0))->text();
-        str = parser.parseToMemory(str);
-        cells.append(str);
-    }
+        QTableWidget* table = ui->programTableWidget;
+        QVector<QString> cells;
 
-    Memory memory(cells);
-    em3.setMemory(memory);
+        for(int i = 0; i < table->rowCount(); i++)
+        {
+            QString str = dynamic_cast<TableItem*>(table->cellWidget(i,1))->text();
+            str = parser.parseToMemory(str);
+            cells.append(str);
+        }
+
+        Memory memory(cells);
+        em3.setMemory(memory);
+    }
+    catch (std::exception& e)
+    {
+        ui->outputTextEdit->setPlainText(e.what());
+    }
 }
 
 void MainWindow::on_clearButton_clicked()
@@ -270,4 +358,25 @@ void MainWindow::on_clearButton_clicked()
     em3 = EM3(settings);
     initProgramTableWidget(ui->programTableWidget);
     initRegistersListWidget(ui->registersListWidget);
+    ui->outputTextEdit->clear();
+    ui->stepButton->setEnabled(true);
+    ui->stopButton->setEnabled(true);
+}
+
+
+void MainWindow::on_stopButton_clicked()
+{
+    em3.init();
+    initProgramTableWidget(ui->programTableWidget);
+    initRegistersListWidget(ui->registersListWidget);
+    ui->stopButton->setEnabled(false);
+    ui->stepButton->setEnabled(false);
+}
+
+
+void MainWindow::on_digitsOnlyCheckBox_clicked(bool checked)
+{
+    digitsOnly = checked;
+    parser.setDigitsOnly(digitsOnly);
+    editMemoryCells(ui->programTableWidget);
 }

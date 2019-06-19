@@ -50,11 +50,13 @@ QTableWidget{
 	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
 }
 
+
 QListWidget{
 	border-width: 1px;
 	border-style: solid;
 	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
 }
+
 
 QLineEdit {
 	font: 11pt &quot;Consolas&quot;;
@@ -336,6 +338,7 @@ QCheckBox::indicator:checked {
 
 	height: 10px;
 	width: 10px;
+	border-radius:5px;
 	border-style:solid;
 	border-width: 1px;
 	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
@@ -346,6 +349,7 @@ QCheckBox::indicator:unchecked {
 
 	height: 10px;
 	width: 10px;
+	border-radius:5px;
 	border-style:solid;
 	border-width: 1px;
 	border-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(0, 113, 255, 255), stop:1 rgba(91, 171, 252, 255));
@@ -375,6 +379,11 @@ QRadioButton::indicator:!checked {
 	color: #a9b7c6;
 	background-color: transparent;
 }
+
+QRadioButton::indicator:checked[urgent=true] {
+ 	 color: red;
+}
+
 QStatusBar {
 	color:#027f7f;
 }
@@ -615,7 +624,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <widget class="QPlainTextEdit" name="inputTextEdit">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>420</x>
       <y>10</y>
       <width>251</width>
       <height>131</height>
@@ -631,7 +640,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <widget class="QPlainTextEdit" name="outputTextEdit">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>420</x>
       <y>220</y>
       <width>251</width>
       <height>231</height>
@@ -647,7 +656,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>299</x>
+      <x>300</x>
       <y>470</y>
       <width>71</width>
       <height>31</height>
@@ -710,7 +719,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <widget class="QListWidget" name="registersListWidget">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>690</x>
       <y>10</y>
       <width>291</width>
       <height>441</height>
@@ -734,15 +743,24 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>351</width>
+      <width>374</width>
       <height>441</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>374</width>
+      <height>0</height>
+     </size>
     </property>
     <property name="font">
      <font>
       <family>Consolas</family>
       <pointsize>11</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="sizeAdjustPolicy">
      <enum>QAbstractScrollArea::AdjustIgnored</enum>
@@ -757,13 +775,13 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <number>10</number>
     </property>
     <property name="columnCount">
-     <number>1</number>
+     <number>2</number>
     </property>
     <attribute name="horizontalHeaderVisible">
      <bool>true</bool>
     </attribute>
     <attribute name="horizontalHeaderCascadingSectionResizes">
-     <bool>true</bool>
+     <bool>false</bool>
     </attribute>
     <attribute name="horizontalHeaderMinimumSectionSize">
      <number>20</number>
@@ -794,35 +812,15 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <row/>
     <row/>
     <column/>
+    <column/>
     <item row="0" column="0">
      <property name="text">
       <string/>
      </property>
      <property name="textAlignment">
-      <set>AlignLeading|AlignVCenter</set>
+      <set>AlignCenter</set>
      </property>
     </item>
-   </widget>
-   <widget class="QRadioButton" name="digitsRadioButton">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>460</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Yu Gothic UI Semilight</family>
-      <pointsize>11</pointsize>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Only Digits</string>
-    </property>
    </widget>
    <widget class="QPushButton" name="storeButton">
     <property name="geometry">
@@ -864,6 +862,67 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     </property>
     <property name="text">
      <string>Clear</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stepButton">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>470</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Yu Gothic UI Semilight</family>
+      <pointsize>11</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Step</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stopButton">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>470</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Yu Gothic UI Semilight</family>
+      <pointsize>11</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="digitsOnlyCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>470</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Yu Gothic UI Semilight</family>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Digits Only</string>
     </property>
    </widget>
   </widget>

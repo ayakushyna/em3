@@ -65,7 +65,7 @@ const Memory& EM3::getMemory() const
 }
 void EM3::setMemory( Memory& memory)
 {
-    memory = memory;
+    this->memory = memory;
 }
 
 const QVector<uint64_t>& EM3::getRegisters() const
@@ -96,7 +96,9 @@ uint64_t EM3::getRA() const
 
 void EM3::setRA(uint64_t i)
 {
-    RA = i;
+    if(i == memory.getSize())
+        Stop = true;
+    RA = i % memory.getSize();
 }
 
 

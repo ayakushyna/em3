@@ -2,7 +2,8 @@
 #define TABLEITEM_H
 
 #include <QObject>
-#include <QWidget>
+#include <QtWidgets>
+#include <QStyleOption>
 #include <QLineEdit>
 #include <QKeyEvent>
 #include "parser.h"
@@ -35,6 +36,7 @@ private:
     bool digitsOnly, command;
     uint8_t commCodeLength;
     uint8_t numCodeLength;
+
     void setMask();
 };
 

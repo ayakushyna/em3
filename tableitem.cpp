@@ -76,3 +76,4 @@ void TableItem::selectionSlot()
     item->deselect();
     item->setCursorPosition(pos);
 }
+

@@ -35,9 +35,11 @@ private:
     EM3 em3;
 
     void initProgramTableWidget(QTableWidget* table);
-    void setProgramTableWidget(QTableWidget* table);
-    void setRow(QTableWidget* table, const QString& str, int i);
+    void editMemoryCells(QTableWidget* table);
+    void updateMemoryCells(QTableWidget* table);
+    void setRow(QTableWidget* table, int i , const QString& str, bool checked = false);
     void initRegistersListWidget(QListWidget* list);
+    void step();
 
 private slots:
     void on_startButton_clicked();
@@ -45,11 +47,15 @@ private slots:
     void on_showButton_clicked();
     void on_storeButton_clicked();
     void on_clearButton_clicked();
-    void on_digitsRadioButton_clicked(bool checked);
+    void on_stepButton_clicked();
+    void on_stopButton_clicked();
+    void on_digitsOnlyCheckBox_clicked(bool checked);
 
     void saveApp();
     void loadApp();
+    void aboutApp();
     void infoDialog();
+
 };
 
 #endif // MAINWINDOW_H
