@@ -1,25 +1,31 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <QVector>
 #include <memory>
-
-class Cell
-{
-public:
-    Cell();
-    virtual ~Cell();
-};
+#include <QVector>
+#include <QString>
+#include <QtWidgets>
 
 class Memory
 {
 public:
-    Memory();
+    Memory(uint8_t length);
+    Memory(const QVector<QString>& cells);
+    void setMemoryCells(const QVector<QString>& cells);
+    const QVector<QString>& getMemoryCells() const;
     ~Memory();
 
+    QString& operator[](uint64_t index);
+    const QString& operator[](uint64_t index) const;
+
+    uint64_t getSize() const;
+
+    void read(const QJsonObject&);
+    void write(QJsonObject&) const;
+
 private:
-    uint16_t size = 512;
-    QVector<std::shared_ptr<Cell>> memoryCells;
+    static const uint64_t size = 512;
+    QVector<QString> memoryCells;
 };
 
 #endif // MEMORY_H

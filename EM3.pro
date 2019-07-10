@@ -25,17 +25,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    commandstring.cpp \
         main.cpp \
         mainwindow.cpp \
     memory.cpp \
-    command.cpp \
-    constant.cpp
+    em3.cpp \
+    memorydialog.cpp \
+    parser.cpp \
+    tableitem.cpp \
+    validator.cpp
 
 HEADERS += \
+    commandstring.h \
         mainwindow.h \
     memory.h \
-    command.h \
-    constant.h
+    em3.h \
+    memorydialog.h \
+    parser.h \
+    shared_defs.h \
+    tableitem.h \
+    validator.h
 
 FORMS += \
         mainwindow.ui
@@ -44,3 +53,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
